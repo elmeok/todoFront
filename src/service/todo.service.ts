@@ -1,5 +1,6 @@
 import {ref} from 'vue'
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
+import { Todo } from '../models/todo';
 
 export const todoService = (baseUrl = "http://localhost:3000") => {
     const url = ref<string>(baseUrl);
@@ -9,7 +10,7 @@ export const todoService = (baseUrl = "http://localhost:3000") => {
       return response.data;
     }
   
-    const createTodo = async (todo: Todo): void => {
+    const createTodo = async (todo: Todo): Promise<AxiosResponse<any>> => {
         const response = await axios.post(`${url.value}/todos`, todo);
         return response;
     }

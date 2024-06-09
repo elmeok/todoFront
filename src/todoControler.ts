@@ -14,15 +14,21 @@ export const useTodo = () => {
 
   const fetchTodoList = async (): void => (todos.value = await client.getTodoList())
   
-  const addNewTodo = (todo: Todo): void => {
+  const addNewTodo = async(todo: Todo): Promise<void> => {
     //todos.value.push(todo)
-    client.createTodo(todo)
+    const response = await client.createTodo(todo);
+    console.log("add is done");
+    console.log(response);
+    fetchTodoList();
+    
+    
   }
   
-  const removeTodo = (todo: Todo): void => {
+  const removeTodo = async (todo: Todo): Promise<void> => {
     console.log(todo);
     //const deletedTodo: Todo[] = todos.value.splice(index, 1)
-    client.deleteTodo(todo);
+    await client.deleteTodo(todo);
+    fetchTodoList();
   }
 
   return {

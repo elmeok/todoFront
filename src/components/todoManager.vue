@@ -4,6 +4,11 @@ import { Todo } from '../models/todo';
 import todoItem from '../components/todoItem.vue'
 import { todoService } from "../service/todo.service"
 
+import {useToast} from 'vue-toast-notification';
+import 'vue-toast-notification/dist/theme-sugar.css';
+
+const $toast = useToast();
+
 
 const todos = ref<Todo[]>([])
 const client = todoService()
@@ -42,18 +47,27 @@ const addTodo = async () => {
 	}
     try{
          await client.createTodo(draftTodo.value);
+		 fetchTodoList();
+		 let instance = $toast.success('Une tâche est ajoutée');
     }catch(e:any){
+		let instance = $toast.error(e.response.data.message);
         console.log(e.response.data.message);
     }
 
   console.log("save to do");
-  fetchTodoList();
+  
 
 }
 
 const removeTodo = async (todo: Todo): Promise<void> => {
-    await client.deleteTodo(todo);
-    fetchTodoList();
+	try{
+		await client.deleteTodo(todo);
+		fetchTodoList();
+	}catch(e:any){
+		console.log(e.response.data.message);
+	}
+    
+    
   }
 
 </script>

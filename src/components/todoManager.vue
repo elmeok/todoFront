@@ -13,6 +13,8 @@ const $toast = useToast();
 
 
 const todos = ref<Todo[]>([])
+let previousTodos : Todo[] = []; // Copie précédente des todos
+
 const client = todoService()
 
 onMounted(async () => {
@@ -23,6 +25,7 @@ onMounted(async () => {
 const fetchTodoList = async (): Promise<void> => {
     const response = await (client.getTodoList());
     todos.value = response.data;
+	previousTodos = JSON.parse(JSON.stringify(response.data));
   }
 
 // const input_content = ref('')
@@ -47,10 +50,20 @@ const debouncedUpdateTodo = debounce(async (todo: Todo) => {
   }
 }, 2000);
 
-watch(todos, (newVal) => {
-  newVal.forEach(todo => {
-    const todoCopy = { ...todo };  // Create a copy of the todo object
-    debouncedUpdateTodo(todoCopy);
+watch(todos, (newVal, oldVal) => {
+	console.log("ici")
+  newVal.forEach((newTodo, index) => {
+    const oldTodo = previousTodos[index];
+	console.log("newTodo");
+	console.log(newTodo);
+	console.log("oldTodo");
+	console.log(oldTodo);
+	//console.log(`new Title  ${newTodo.title} old Title ${oldTodo.title} `);
+    if (oldTodo && (newTodo.title !== oldTodo.title || newTodo.description !== oldTodo.description)) {
+      const todoCopy = { ...newTodo };
+	  console.log(todoCopy);
+      debouncedUpdateTodo(todoCopy);
+    }
   });
 }, { deep: true });
 

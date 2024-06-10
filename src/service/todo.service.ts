@@ -18,7 +18,7 @@ export const todoService = (baseUrl = "http://localhost:3000") => {
   }
   
     const deleteTodo = async (todo: Todo): Promise<AxiosResponse<Todo>> => {
-        return await axios.delete(`${url.value}/todos/${todo._id}`, todo);
+        return await axios.delete(`${url.value}/todos/${todo._id}`);
     }
   
     return {

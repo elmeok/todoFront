@@ -60,7 +60,7 @@ watch(todos, (newVal) => {
 }, { deep: true });
 
 const addTodo = async () => {
-	if (draftTodo.value.title.trim() === '' || draftTodo.value.title.trim() === '') {
+	if (draftTodo.value.title.trim() === '') {
 		$toast.error("Le titre ne peut pas être vide");
 		return
 	}
@@ -68,6 +68,9 @@ const addTodo = async () => {
          await client.createTodo(draftTodo.value);
 		 fetchTodoList();
 		 let instance = $toast.success('Une tâche est ajoutée');
+		 draftTodo.value.title ="";
+		 draftTodo.value.description ="";
+
     }catch(e:any){
 		let instance = $toast.error(e.response.data.message);
         console.log(e.response.data.message);
@@ -360,19 +363,14 @@ input:checked ~ .bubble::after {
 	cursor: pointer;
 }
 
-.todo-item .todo-content {
-	/* flex: 1 1 0%; */
-}
+
 
 .todo-item .todo-content input {
 	color: var(--dark);
 	font-size: 1.125rem;
 }
 
-.todo-item .actions {
-	/* display: flex; */
-	/* align-items: center; */
-}
+
 
 .todo-item .actions button {
 	/* display: block; */

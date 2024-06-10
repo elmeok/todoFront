@@ -7,6 +7,8 @@ import { todoService } from "../service/todo.service"
 import {useToast} from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-sugar.css';
 
+import debounce from 'lodash.debounce'
+
 const $toast = useToast();
 
 
@@ -32,17 +34,29 @@ const draftTodo = ref<Todo>({
 })
 
 
+const debouncedUpdateTodo = debounce(async (todo: Todo) => {
+  console.log("update");
+  console.log(todo);
+  try {
+    await client.updateTodo(todo);
+    let instance = $toast.success('La tâche est modifiée');
+  } catch (e: any) {
+    console.log(e);
+    let instance = $toast.error(e.response.data.message);
+    console.log(e.response.data.message);
+  }
+}, 2000);
+
 watch(todos, (newVal) => {
-  console.log("edit to do");
-  console.log(todos)
-	//localStorage.setItem('todos', JSON.stringify(newVal))
-}, {
-	deep: true
-})
+  newVal.forEach(todo => {
+    const todoCopy = { ...todo };  // Create a copy of the todo object
+    debouncedUpdateTodo(todoCopy);
+  });
+}, { deep: true });
 
 const addTodo = async () => {
-  console.log("add to do")
 	if (draftTodo.value.title.trim() === '' || draftTodo.value.title.trim() === '') {
+		$toast.error("Le titre ne peut pas être vide");
 		return
 	}
     try{
@@ -53,10 +67,6 @@ const addTodo = async () => {
 		let instance = $toast.error(e.response.data.message);
         console.log(e.response.data.message);
     }
-
-  console.log("save to do");
-  
-
 }
 
 const removeTodo = async (todo: Todo): Promise<void> => {

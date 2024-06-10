@@ -12,6 +12,10 @@ export const todoService = (baseUrl = "http://localhost:3000") => {
     const createTodo = async (todo: Todo): Promise<AxiosResponse<Todo>> => {
         return await axios.post(`${url.value}/todos`, todo);
     }
+
+    const updateTodo = async (todo: Todo): Promise<AxiosResponse<Todo>> => {
+      return await axios.patch(`${url.value}/todos/${todo._id}`, todo);
+  }
   
     const deleteTodo = async (todo: Todo): Promise<AxiosResponse<Todo>> => {
         return await axios.delete(`${url.value}/todos/${todo._id}`, todo);
@@ -20,7 +24,8 @@ export const todoService = (baseUrl = "http://localhost:3000") => {
     return {
       getTodoList,
       createTodo,
-      deleteTodo
+      deleteTodo,
+      updateTodo
     }
   }
 

@@ -38,8 +38,6 @@ const draftTodo = ref<Todo>({
 
 
 const debouncedUpdateTodo = debounce(async (todo: Todo) => {
-  console.log("update");
-  console.log(todo);
   try {
     await client.updateTodo(todo);
     let instance = $toast.success('La tâche est modifiée');
@@ -47,21 +45,15 @@ const debouncedUpdateTodo = debounce(async (todo: Todo) => {
     console.log(e);
     let instance = $toast.error(e.response.data.message);
     console.log(e.response.data.message);
+	fetchTodoList();
   }
 }, 2000);
 
-watch(todos, (newVal, oldVal) => {
-	console.log("ici")
+watch(todos, (newVal) => {
   newVal.forEach((newTodo, index) => {
     const oldTodo = previousTodos[index];
-	console.log("newTodo");
-	console.log(newTodo);
-	console.log("oldTodo");
-	console.log(oldTodo);
-	//console.log(`new Title  ${newTodo.title} old Title ${oldTodo.title} `);
     if (oldTodo && (newTodo.title !== oldTodo.title || newTodo.description !== oldTodo.description)) {
       const todoCopy = { ...newTodo };
-	  console.log(todoCopy);
       debouncedUpdateTodo(todoCopy);
     }
   });
@@ -89,9 +81,31 @@ const removeTodo = async (todo: Todo): Promise<void> => {
 	}catch(e:any){
 		console.log(e.response.data.message);
 	}
-    
-    
-  }
+}
+
+const changeStatusTodo = async (todo: Todo): void => {
+	const todoTemp = JSON.parse(JSON.stringify(todo));
+	switch (todo.status) {
+      case "todo":
+        todoTemp.status = "inProgress";
+		await client.updateTodo(todoTemp);
+		fetchTodoList();
+        break;
+      case "inProgress":
+        todoTemp.status = "done";
+		await client.updateTodo(todoTemp);
+		fetchTodoList();
+        break;
+      case "done":
+        todoTemp.status = "todo";
+		await client.updateTodo(todoTemp);
+		fetchTodoList();
+        break;
+      default:
+        console.error("Statut de tâche invalide :", todo.status);
+        return;
+	}
+}
 
 </script>
 
@@ -124,8 +138,8 @@ const removeTodo = async (todo: Todo): Promise<void> => {
 			<h3>Votre Liste</h3>
 			<div class="list" id="todo-list">
 
-				<div v-for="todo in todos" :class="`todo-item ${todo.done && 'done'}`">
-					<todoItem :todo = todo :removeTodo = removeTodo></todoItem>
+				<div v-for="todo in todos" :class="`todo-item ${todo.status}`">
+					<todoItem :todo = todo :removeTodo = removeTodo :changeStatusTodo = changeStatusTodo></todoItem>
           <!-- <div class="todo-content">
 						<input type="text" v-model="todo.description" />
 					</div> -->
@@ -263,6 +277,23 @@ input[type="checkbox"] {
 	box-shadow: var(--personal-glow);
 }
 
+.bubble.todo {
+	border-color: var(--personal);
+	box-shadow: var(--personal-glow);
+}
+
+.bubble.inProgress {
+
+	border-color: orange;
+	color:orange;
+	box-shadow: var(--personal-glow);
+}
+
+.bubble.done{
+	border-color: green;
+	box-shadow: green;
+}
+
 .bubble::after {
 	content: "";
 	display: block;
@@ -366,6 +397,11 @@ input:checked ~ .bubble::after {
 }
 
 .todo-item.done .todo-content input {
+	text-decoration: line-through;
+	color: var(--grey);
+}
+
+.todo-item.done .todoDescription input {
 	text-decoration: line-through;
 	color: var(--grey);
 }

@@ -1,15 +1,11 @@
 <script setup lang="ts">
-defineProps(["todo","removeTodo"])
+defineProps(["todo","removeTodo","changeStatusTodo"])
 </script>
 
 <template>
 
     <label>
-        <input type="checkbox" v-model="todo.done" />
-        <span :class="`bubble ${todo.category == 'business'
-                ? 'business'
-                : 'personal'
-            }`"></span>
+        <span :class="`bubble ${todo.status}`"  @click="changeStatusTodo(todo)"></span>
     </label>
 
     <div class="todo-content">

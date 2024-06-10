@@ -1,3 +1,106 @@
+<script setup lang="ts">
+import { ref, onMounted, computed, watch } from 'vue'
+import { Todo } from '../models/todo';
+import todoItem from '../components/todoItem.vue'
+import { todoService } from "../service/todo.service"
+
+
+const todos = ref<Todo[]>([])
+const client = todoService()
+
+onMounted(async () => {
+  await fetchTodoList();
+})
+
+
+const fetchTodoList = async (): Promise<void> => {
+    const response = await (client.getTodoList());
+    todos.value = response.data;
+  }
+
+// const input_content = ref('')
+const input_category = ref(null)
+
+const draftTodo = ref<Todo>({
+  title: "",
+  description: "",
+})
+
+
+watch(todos, (newVal) => {
+  console.log("edit to do");
+  console.log(todos)
+	//localStorage.setItem('todos', JSON.stringify(newVal))
+}, {
+	deep: true
+})
+
+const addTodo = async () => {
+  console.log("add to do")
+	if (draftTodo.value.title.trim() === '' || draftTodo.value.title.trim() === '') {
+		return
+	}
+    try{
+         await client.createTodo(draftTodo.value);
+    }catch(e:any){
+        console.log(e.response.data.message);
+    }
+
+  console.log("save to do");
+  fetchTodoList();
+
+}
+
+const removeTodo = async (todo: Todo): Promise<void> => {
+    await client.deleteTodo(todo);
+    fetchTodoList();
+  }
+
+</script>
+
+<template>
+	<main class="app">
+		<section class="create-todo">
+			<h3>Crée une Tâche</h3>
+
+			<form id="new-todo-form" @submit.prevent="addTodo">
+				<h4>Titre de votre tâche?</h4>
+				<input 
+					type="text" 
+					name="content" 
+					id="content" 
+					placeholder="Faire ..."
+					v-model="draftTodo.title" />
+				
+                <input 
+					type="text" 
+					name="content" 
+					id="content" 
+					placeholder="Description..."
+					v-model="draftTodo.description" />
+
+				<input type="submit" value="Add todo" />
+			</form>
+		</section>
+
+		<section class="todo-list">
+			<h3>Votre Liste</h3>
+			<div class="list" id="todo-list">
+
+				<div v-for="todo in todos" :class="`todo-item ${todo.done && 'done'}`">
+					<todoItem :todo = todo :removeTodo = removeTodo></todoItem>
+          <!-- <div class="todo-content">
+						<input type="text" v-model="todo.description" />
+					</div> -->
+				</div>
+
+			</div>
+		</section>
+
+	</main>
+</template>
+
+<style>
 :root {
 	--primary: #EA40A4;
 	--business: #3A82EE;
@@ -174,8 +277,8 @@ input:checked ~ .bubble::after {
 } 
 
 .todo-list .todo-item {
-	display: flex;
-	align-items: center;
+	/* display: flex; */
+	 align-items: center; 
 	background-color: #FFF;
 	padding: 1rem;
 	border-radius: 0.5rem;
@@ -184,13 +287,13 @@ input:checked ~ .bubble::after {
 }
 
 .todo-item label {
-	display: block;
+	/* display: block; */
 	margin-right: 1rem;
 	cursor: pointer;
 }
 
 .todo-item .todo-content {
-	flex: 1 1 0%;
+	/* flex: 1 1 0%; */
 }
 
 .todo-item .todo-content input {
@@ -199,13 +302,13 @@ input:checked ~ .bubble::after {
 }
 
 .todo-item .actions {
-	display: flex;
-	align-items: center;
+	/* display: flex; */
+	/* align-items: center; */
 }
 
 .todo-item .actions button {
-	display: block;
-	padding: 0.5rem;
+	/* display: block; */
+	/* padding: 0.5rem; */
 	border-radius: 0.25rem;
 	color: #FFF;
 	cursor: pointer;
@@ -229,3 +332,12 @@ input:checked ~ .bubble::after {
 	text-decoration: line-through;
 	color: var(--grey);
 }
+
+
+.todo-item{
+    display: grid;
+  grid-template-columns: repeat(12, 1fr);
+}
+
+</style>
+
